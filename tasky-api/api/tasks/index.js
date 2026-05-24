@@ -1,6 +1,9 @@
+import '../../db';
 import { v4 as uuidv4 } from 'uuid';
 import express from 'express';
 import { tasksData } from './tasksData';
+import asyncHandler from 'express-async-handler'
+
 
 const router = express.Router(); 
 
@@ -20,22 +23,10 @@ router.get('/:id', (req, res) => {
 });
 
 //Add a task
-router.post('/', (req, res) => {
-    const { title, description, deadline, priority, done, created_at, updated_at, } = req.body;
-    const newTask = {
-        id: uuidv4(),
-        title,
-        description,
-        deadline,
-        priority,
-        done,
-        created_at: new Date().toISOString() ,
-        updated_at: new Date().toISOString()
-    };
-    tasksData.tasks.push(newTask);
-    res.status(201).json(newTask);
-    tasksData.total_results++;
-});
+router.post('/', asyncHandler(async (req, res) => {
+    const task = await Task(req.body).save();
+    res.status(201).json(task);
+}));
 
 //Update an existing task
 router.put('/:id', (req, res) => {
